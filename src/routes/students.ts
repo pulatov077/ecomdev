@@ -3,7 +3,6 @@ import { supabase } from "../database";
 
 const router = Router();
 
-// GET /api/students — barcha o'quvchilar ro'yxati
 router.get("/", async (_req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
@@ -12,25 +11,23 @@ router.get("/", async (_req: Request, res: Response) => {
       .order("id", { ascending: false });
 
     if (error) {
-      console.error("Supabase error (list students):", error);
       return res.status(500).json({ error: error.message });
     }
 
-    res.json(data || []);
+    res.json(data ?? []);
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Server xatosi" });
+    res.status(500).json({ error: err.message ?? "Internal Server Error" });
   }
 });
 
-// POST /api/students — yangi o'quvchi yaratish
 router.post("/", async (req: Request, res: Response) => {
   try {
     const { name, phone, group_name, monthly_amount } = req.body;
 
     if (!name || !phone || !group_name || monthly_amount === undefined || Number(monthly_amount) <= 0) {
-      return res
-        .status(400)
-        .json({ error: "name, phone, group_name va monthly_amount (>0) majburiy" });
+      return res.status(400).json({
+        error: "Maydonlar to'liq va monthly_amount musbat son bo'lishi shart",
+      });
     }
 
     const { data, error } = await supabase
@@ -47,25 +44,23 @@ router.post("/", async (req: Request, res: Response) => {
       .single();
 
     if (error) {
-      console.error("Supabase error (create student):", error);
       return res.status(500).json({ error: error.message });
     }
 
     res.status(201).json(data);
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Server xatosi" });
+    res.status(500).json({ error: err.message ?? "Internal Server Error" });
   }
 });
 
-// PUT /api/students/:id — o'quvchini yangilash
 router.put("/:id", async (req: Request, res: Response) => {
   try {
     const { name, phone, group_name, monthly_amount } = req.body;
 
     if (!name || !phone || !group_name || monthly_amount === undefined || Number(monthly_amount) <= 0) {
-      return res
-        .status(400)
-        .json({ error: "name, phone, group_name va monthly_amount (>0) majburiy" });
+      return res.status(400).json({
+        error: "Maydonlar to'liq va monthly_amount musbat son bo'lishi shart",
+      });
     }
 
     const { data, error } = await supabase
@@ -81,7 +76,6 @@ router.put("/:id", async (req: Request, res: Response) => {
       .single();
 
     if (error) {
-      console.error("Supabase error (update student):", error);
       return res.status(500).json({ error: error.message });
     }
 
@@ -91,11 +85,10 @@ router.put("/:id", async (req: Request, res: Response) => {
 
     res.json(data);
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Server xatosi" });
+    res.status(500).json({ error: err.message ?? "Internal Server Error" });
   }
 });
 
-// DELETE /api/students/:id — o'quvchini o'chirish
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const { error } = await supabase
@@ -104,13 +97,12 @@ router.delete("/:id", async (req: Request, res: Response) => {
       .eq("id", req.params.id);
 
     if (error) {
-      console.error("Supabase error (delete student):", error);
       return res.status(500).json({ error: error.message });
     }
 
-    res.json({ status: "deleted" });
+    res.json({ success: true, message: "O'quvchi o'chirildi" });
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Server xatosi" });
+    res.status(500).json({ error: err.message ?? "Internal Server Error" });
   }
 });
 

@@ -3,11 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
-const SUPABASE_KEY = process.env.SUPABASE_KEY || "";
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_KEY || "";
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.warn("⚠️ Ogohlantirish: SUPABASE_URL yoki SUPABASE_KEY aniqlanmadi. Iltimos .env faylini to'ldiring!");
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error("SUPABASE_URL and SUPABASE_KEY must be defined in environment");
 }
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+export const supabase = createClient(supabaseUrl, supabaseKey);

@@ -3,20 +3,17 @@ import { supabase } from "../database";
 
 const router = Router();
 
-// GET /api/debtors?month=YYYY-MM — oylik qarzdorlar ro'yxati
 router.get("/", async (req: Request, res: Response) => {
   try {
     let month = req.query.month as string;
 
-    // Agar oy ko'rsatilmasa — joriy oy
     if (!month) {
       const now = new Date();
       month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     }
 
-    // Format tekshirish: YYYY-MM
     if (!/^\d{4}-\d{2}$/.test(month)) {
-      return res.status(400).json({ error: "month formati YYYY-MM bo'lishi kerak" });
+      return res.status(400).json({ error: "month parametri YYYY-MM formatida bo'lishi kerak" });
     }
 
     const [yearStr, monthStr] = month.split("-");
@@ -26,50 +23,37 @@ router.get("/", async (req: Request, res: Response) => {
     const lastDay = new Date(year, mon, 0).getDate();
     const endDate = `${month}-${String(lastDay).padStart(2, "0")}`;
 
-    // 1. Barcha o'quvchilarni olish
-    const { data: students, error: studentError } = await supabase
-      .from("students")
-      .select("*")
-      .order("id", { ascending: true });
+    const [studentsResult, paymentsResult] = await Promise.all([
+      supabase.from("students").select("*").order("id", { ascending: true }),
+      supabase.from("payments").select("student_id, amount, date").gte("date", startDate).lte("date", endDate),
+    ]);
 
-    if (studentError) {
-      console.error("Supabase error (students for debtors):", studentError);
-      return res.status(500).json({ error: studentError.message });
+    if (studentsResult.error) {
+      return res.status(500).json({ error: studentsResult.error.message });
+    }
+    if (paymentsResult.error) {
+      return res.status(500).json({ error: paymentsResult.error.message });
     }
 
-    // 2. Shu oydagi to'lovlarni olish
-    const { data: payments, error: paymentError } = await supabase
-      .from("payments")
-      .select("student_id, amount, date")
-      .gte("date", startDate)
-      .lte("date", endDate);
-
-    if (paymentError) {
-      console.error("Supabase error (payments for debtors):", paymentError);
-      return res.status(500).json({ error: paymentError.message });
-    }
-
-    // 3. Har bir o'quvchining shu oydagi to'lagan summasini jamlash
     const paidByStudent = new Map<number, number>();
-    for (const p of payments || []) {
-      const sid = Number(p.student_id);
-      const current = paidByStudent.get(sid) || 0;
-      paidByStudent.set(sid, current + Number(p.amount));
+    for (const payment of paymentsResult.data ?? []) {
+      const sid = Number(payment.student_id);
+      const prev = paidByStudent.get(sid) ?? 0;
+      paidByStudent.set(sid, prev + Number(payment.amount));
     }
 
-    // 4. Qarzdorlarni aniqlash (oylik summa - to'langan > 0)
     const debtors = [];
-    for (const s of students || []) {
-      const monthlyAmount = Number(s.monthly_amount);
-      const paid = paidByStudent.get(Number(s.id)) || 0;
+    for (const student of studentsResult.data ?? []) {
+      const monthlyAmount = Number(student.monthly_amount);
+      const paid = paidByStudent.get(Number(student.id)) ?? 0;
       const debt = monthlyAmount - paid;
 
       if (debt > 0) {
         debtors.push({
-          id: s.id,
-          name: s.name,
-          phone: s.phone,
-          group_name: s.group_name,
+          id: student.id,
+          name: student.name,
+          phone: student.phone,
+          group_name: student.group_name,
           monthly_amount: monthlyAmount,
           paid,
           debt,
@@ -77,13 +61,11 @@ router.get("/", async (req: Request, res: Response) => {
       }
     }
 
-    // 5. Qarz bo'yicha kamayish tartibida saralash
     debtors.sort((a, b) => b.debt - a.debt);
 
     res.json(debtors);
   } catch (err: any) {
-    console.error("Debtors calculation error:", err);
-    res.status(500).json({ error: err.message || "Server xatosi" });
+    res.status(500).json({ error: err.message ?? "Internal Server Error" });
   }
 });
 
