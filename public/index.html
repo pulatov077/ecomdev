@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcomDev — O'quv Markazi To'lovlar</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 16px 20px;
+      text-align: center;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 12px rgba(79,70,229,.3);
+    }
+    .header h1 { font-size: 20px; font-weight: 700; }
+    .header p  { font-size: 12px; opacity: .85; margin-top: 2px; }
+
+    /* ===== Tabs ===== */
+    .tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 2px solid #e5e7eb;
+      position: sticky; top: 60px; z-index: 99;
+    }
+    .tab {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+    }
+    .tab:hover { color: #4f46e5; background: #f5f3ff; }
+    .tab.active {
+      color: #4f46e5;
+      border-bottom-color: #4f46e5;
+      background: #f5f3ff;
+    }
+    .tab-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+    /* ===== Container ===== */
+    .container { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+    /* ===== Cards ===== */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      transition: box-shadow .2s;
+    }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .card-name { font-weight: 600; font-size: 16px; }
+    .card-group {
+      font-size: 12px;
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .card-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .card-info span { display: flex; align-items: center; gap: 4px; }
+    .debt-amount {
+      color: #ef4444;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .paid-amount { color: #10b981; font-weight: 600; }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: #4f46e5; color: #fff; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger  { background: #ef4444; color: #fff; }
+    .btn-danger:hover  { background: #dc2626; }
+    .btn-outline {
+      background: #fff;
+      color: #4f46e5;
+      border: 1.5px solid #4f46e5;
+    }
+    .btn-outline:hover { background: #f5f3ff; }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .btn-block { width: 100%; }
+
+    /* ===== Forms ===== */
+    .form-group { margin-bottom: 12px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+    }
+
+    /* ===== Month Picker ===== */
+    .month-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .month-picker label { font-weight: 500; font-size: 14px; white-space: nowrap; }
+    .month-picker input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 200;
+      animation: fadeIn .2s;
+    }
+    .modal {
+      background: #fff;
+      width: 100%;
+      max-width: 640px;
+      border-radius: 16px 16px 0 0;
+      padding: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp .3s;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      background: #f3f4f6;
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    /* ===== Stats ===== */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .stat-label { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .stat-red .stat-value { color: #ef4444; }
+    .stat-blue .stat-value { color: #4f46e5; }
+
+    /* ===== Empty ===== */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #9ca3af;
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 15px; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 300;
+      animation: fadeIn .3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    }
+    .toast.success { background: #059669; }
+    .toast.error   { background: #dc2626; }
+
+    /* ===== Responsive ===== */
+    @media (min-width: 640px) {
+      .modal {
+        border-radius: 16px;
+        margin-bottom: 40px;
+      }
+      .modal-overlay { align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <div class="header">
+      <h1>📚 O'quv Markazi</h1>
+      <p>To'lovlarni boshqarish tizimi</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab" :class="{ active: tab === 'debtors' }" @click="tab = 'debtors'">
+        <span class="tab-icon">💰</span> Qarzdorlar
+      </div>
+      <div class="tab" :class="{ active: tab === 'students' }" @click="tab = 'students'; loadStudents()">
+        <span class="tab-icon">👨‍🎓</span> O'quvchilar
+      </div>
+      <div class="tab" :class="{ active: tab === 'payments' }" @click="tab = 'payments'">
+        <span class="tab-icon">💳</span> To'lov qo'shish
+      </div>
+    </div>
+
+    <div class="container">
+
+      <!-- ==================== DEBTORS TAB ==================== -->
+      <div v-if="tab === 'debtors'">
+        <!-- Month Picker -->
+        <div class="month-picker">
+          <label>📅 Oy:</label>
+          <input type="month" v-model="selectedMonth" @change="loadDebtors" />
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+          <div class="stat-card stat-red">
+            <div class="stat-value">{{ debtors.length }}</div>
+            <div class="stat-label">Qarzdorlar soni</div>
+          </div>
+          <div class="stat-card stat-blue">
+            <div class="stat-value">{{ formatMoney(totalDebt) }}</div>
+            <div class="stat-label">Umumiy qarz</div>
+          </div>
+        </div>
+
+        <!-- Debtor Cards -->
+        <div v-if="debtors.length">
+          <div class="card" v-for="d in debtors" :key="d.id">
+            <div class="card-header">
+              <span class="card-name">{{ d.name }}</span>
+              <span class="card-group">{{ d.group_name }}</span>
+            </div>
+            <div class="card-info">
+              <span>📞 {{ d.phone }}</span>
+              <span>📋 Oylik: {{ formatMoney(d.monthly_amount) }}</span>
+              <span class="paid-amount">✅ To'ladi: {{ formatMoney(d.paid) }}</span>
+              <span class="debt-amount">❌ Qarz: {{ formatMoney(d.debt) }}</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-success btn-sm" @click="openPayModal(d)">
+                💵 To'lov kiritish
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="empty-state">
+          <div class="icon">🎉</div>
+          <p>Bu oyda qarzdorlar yo'q!</p>
+        </div>
+      </div>
+
+      <!-- ==================== STUDENTS TAB ==================== -->
+      <div v-if="tab === 'students'">
+        <button class="btn btn-primary btn-block" style="margin-bottom:16px"
+                @click="openStudentModal()">
+          ➕ Yangi o'quvchi qo'shish
+        </button>
+
+        <div v-if="students.length">
+          <div class="card" v-for="s in students" :key="s.id">
+            <div class="card-header">
+              <span class="card-name">{{ s.name }}</span>
+              <span class="card-group">{{ s.group_name }}</span>
+            </div>
+            <div class="card-info">
+              <span>📞 {{ s.phone }}</span>
+              <span>💰 {{ formatMoney(s.monthly_amount) }} / oy</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-outline btn-sm" @click="openStudentModal(s)">✏️ Tahrirlash</button>
+              <button class="btn btn-danger btn-sm" @click="confirmDeleteStudent(s)">🗑 O'chirish</button>
+              <button class="btn btn-success btn-sm" @click="openPayModal(s)">💵 To'lov</button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="empty-state">
+          <div class="icon">👨‍🎓</div>
+          <p>Hali o'quvchilar qo'shilmagan</p>
+        </div>
+      </div>
+
+      <!-- ==================== PAYMENTS TAB ==================== -->
+      <div v-if="tab === 'payments'">
+        <div class="card">
+          <h3 style="margin-bottom: 14px; font-size: 16px;">💳 Yangi to'lov kiritish</h3>
+          <div class="form-group">
+            <label>O'quvchi</label>
+            <select v-model="payForm.student_id">
+              <option value="">— Tanlang —</option>
+              <option v-for="s in students" :key="s.id" :value="s.id">
+                {{ s.name }} ({{ s.group_name }})
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Summa</label>
+            <input type="number" v-model.number="payForm.amount" placeholder="500000" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Sana</label>
+            <input type="date" v-model="payForm.date" />
+          </div>
+          <button class="btn btn-success btn-block" @click="submitPayment" :disabled="payLoading">
+            {{ payLoading ? '⏳ Saqlanmoqda...' : '✅ To\'lovni saqlash' }}
+          </button>
+        </div>
+
+        <!-- Recent payments -->
+        <h3 style="margin: 20px 0 12px; font-size: 16px;">📋 So'nggi to'lovlar</h3>
+        <div class="form-group">
+          <select v-model="payHistoryStudentId" @change="loadPaymentHistory">
+            <option value="">— O'quvchini tanlang —</option>
+            <option v-for="s in students" :key="s.id" :value="s.id">
+              {{ s.name }} ({{ s.group_name }})
+            </option>
+          </select>
+        </div>
+        <div v-if="payHistory.length">
+          <div class="card" v-for="p in payHistory" :key="p.id">
+            <div class="card-header">
+              <span class="card-name">{{ formatMoney(p.amount) }}</span>
+              <span class="card-group">{{ p.date }}</span>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="payHistoryStudentId" class="empty-state">
+          <div class="icon">📭</div>
+          <p>To'lovlar topilmadi</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== STUDENT MODAL ==================== -->
+    <div class="modal-overlay" v-if="showStudentModal" @click.self="showStudentModal = false">
+      <div class="modal">
+        <div class="modal-title">
+          {{ editStudent ? '✏️ O\'quvchini tahrirlash' : '➕ Yangi o\'quvchi' }}
+          <button class="modal-close" @click="showStudentModal = false">✕</button>
+        </div>
+        <div class="form-group">
+          <label>Ism</label>
+          <input type="text" v-model="studentForm.name" placeholder="Ism Familiya" />
+        </div>
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="tel" v-model="studentForm.phone" placeholder="+998901234567" />
+        </div>
+        <div class="form-group">
+          <label>Guruh</label>
+          <input type="text" v-model="studentForm.group_name" placeholder="Frontend-1" />
+        </div>
+        <div class="form-group">
+          <label>Oylik to'lov summasi</label>
+          <input type="number" v-model.number="studentForm.monthly_amount" placeholder="500000" min="0" />
+        </div>
+        <button class="btn btn-primary btn-block" @click="submitStudent" :disabled="studentLoading">
+          {{ studentLoading ? '⏳ Saqlanmoqda...' : '💾 Saqlash' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== PAY MODAL ==================== -->
+    <div class="modal-overlay" v-if="showPayModal" @click.self="showPayModal = false">
+      <div class="modal">
+        <div class="modal-title">
+          💵 To'lov — {{ payModalStudent?.name }}
+          <button class="modal-close" @click="showPayModal = false">✕</button>
+        </div>
+        <div class="form-group">
+          <label>Summa</label>
+          <input type="number" v-model.number="quickPayForm.amount"
+                 :placeholder="payModalStudent?.debt || payModalStudent?.monthly_amount"
+                 min="0" />
+        </div>
+        <div class="form-group">
+          <label>Sana</label>
+          <input type="date" v-model="quickPayForm.date" />
+        </div>
+        <button class="btn btn-success btn-block" @click="submitQuickPay" :disabled="payLoading">
+          {{ payLoading ? '⏳ Saqlanmoqda...' : '✅ To\'lovni saqlash' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" :class="toast.type" v-if="toast.show">{{ toast.message }}</div>
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        // ===== State =====
+        const tab = ref('debtors');
+        const selectedMonth = ref(getCurrentMonth());
+        const debtors = ref([]);
+        const students = ref([]);
+        const payHistory = ref([]);
+        const payHistoryStudentId = ref('');
+
+        // Modals
+        const showStudentModal = ref(false);
+        const showPayModal = ref(false);
+        const editStudent = ref(null);
+        const payModalStudent = ref(null);
+
+        // Forms
+        const studentForm = reactive({ name: '', phone: '', group_name: '', monthly_amount: '' });
+        const payForm = reactive({ student_id: '', amount: '', date: getToday() });
+        const quickPayForm = reactive({ amount: '', date: getToday() });
+
+        // Loading states
+        const studentLoading = ref(false);
+        const payLoading = ref(false);
+
+        // Toast
+        const toast = reactive({ show: false, message: '', type: '' });
+
+        // ===== Computed =====
+        const totalDebt = computed(() => debtors.value.reduce((sum, d) => sum + d.debt, 0));
+
+        // ===== Helpers =====
+        function getCurrentMonth() {
+          const d = new Date();
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        }
+        function getToday() {
+          return new Date().toISOString().slice(0, 10);
+        }
+        function formatMoney(val) {
+          return Number(val || 0).toLocaleString('uz-UZ') + ' so\'m';
+        }
+        function showToast(message, type = 'success') {
+          toast.show = true;
+          toast.message = message;
+          toast.type = type;
+          setTimeout(() => { toast.show = false; }, 2500);
+        }
+
+        // ===== API calls =====
+        async function api(url, options = {}) {
+          const res = await fetch(url, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options,
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Xatolik yuz berdi');
+          return data;
+        }
+
+        async function loadDebtors() {
+          try {
+            debtors.value = await api(`/api/debtors?month=${selectedMonth.value}`);
+          } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function loadStudents() {
+          try {
+            students.value = await api('/api/students');
+          } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function loadPaymentHistory() {
+          if (!payHistoryStudentId.value) { payHistory.value = []; return; }
+          try {
+            payHistory.value = await api(`/api/payments/student/${payHistoryStudentId.value}`);
+          } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ===== Student CRUD =====
+        function openStudentModal(student = null) {
+          editStudent.value = student;
+          if (student) {
+            Object.assign(studentForm, {
+              name: student.name,
+              phone: student.phone,
+              group_name: student.group_name,
+              monthly_amount: student.monthly_amount,
+            });
+          } else {
+            Object.assign(studentForm, { name: '', phone: '', group_name: '', monthly_amount: '' });
+          }
+          showStudentModal.value = true;
+        }
+
+        async function submitStudent() {
+          if (!studentForm.name || !studentForm.phone || !studentForm.group_name || !studentForm.monthly_amount) {
+            showToast('Barcha maydonlarni to\'ldiring', 'error');
+            return;
+          }
+          studentLoading.value = true;
+          try {
+            if (editStudent.value) {
+              await api(`/api/students/${editStudent.value.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(studentForm),
+              });
+              showToast('O\'quvchi yangilandi ✅');
+            } else {
+              await api('/api/students', {
+                method: 'POST',
+                body: JSON.stringify(studentForm),
+              });
+              showToast('O\'quvchi qo\'shildi ✅');
+            }
+            showStudentModal.value = false;
+            await loadStudents();
+            await loadDebtors();
+          } catch (e) {
+            showToast(e.message, 'error');
+          } finally {
+            studentLoading.value = false;
+          }
+        }
+
+        async function confirmDeleteStudent(student) {
+          if (!confirm(`"${student.name}" ni o'chirishni xohlaysizmi? Barcha to'lovlari ham o'chadi!`)) return;
+          try {
+            await api(`/api/students/${student.id}`, { method: 'DELETE' });
+            showToast('O\'quvchi o\'chirildi 🗑');
+            await loadStudents();
+            await loadDebtors();
+          } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        // ===== Payments =====
+        function openPayModal(studentOrDebtor) {
+          payModalStudent.value = studentOrDebtor;
+          quickPayForm.amount = studentOrDebtor.debt || studentOrDebtor.monthly_amount;
+          quickPayForm.date = getToday();
+          showPayModal.value = true;
+        }
+
+        async function submitQuickPay() {
+          if (!quickPayForm.amount || quickPayForm.amount <= 0) {
+            showToast('Summani kiriting', 'error');
+            return;
+          }
+          payLoading.value = true;
+          try {
+            await api('/api/payments', {
+              method: 'POST',
+              body: JSON.stringify({
+                student_id: payModalStudent.value.id,
+                amount: quickPayForm.amount,
+                date: quickPayForm.date,
+              }),
+            });
+            showToast('To\'lov saqlandi ✅');
+            showPayModal.value = false;
+            await loadDebtors();
+          } catch (e) {
+            showToast(e.message, 'error');
+          } finally {
+            payLoading.value = false;
+          }
+        }
+
+        async function submitPayment() {
+          if (!payForm.student_id || !payForm.amount || payForm.amount <= 0) {
+            showToast('O\'quvchi va summani kiriting', 'error');
+            return;
+          }
+          payLoading.value = true;
+          try {
+            await api('/api/payments', {
+              method: 'POST',
+              body: JSON.stringify(payForm),
+            });
+            showToast('To\'lov saqlandi ✅');
+            payForm.student_id = '';
+            payForm.amount = '';
+            payForm.date = getToday();
+            await loadDebtors();
+            // Refresh history if viewing same student
+            if (payHistoryStudentId.value) await loadPaymentHistory();
+          } catch (e) {
+            showToast(e.message, 'error');
+          } finally {
+            payLoading.value = false;
+          }
+        }
+
+        // ===== Init =====
+        onMounted(async () => {
+          await loadStudents();
+          await loadDebtors();
+        });
+
+        return {
+          tab, selectedMonth, debtors, students,
+          payHistory, payHistoryStudentId,
+          showStudentModal, showPayModal,
+          editStudent, payModalStudent,
+          studentForm, payForm, quickPayForm,
+          studentLoading, payLoading,
+          toast, totalDebt,
+          formatMoney,
+          loadDebtors, loadStudents, loadPaymentHistory,
+          openStudentModal, submitStudent, confirmDeleteStudent,
+          openPayModal, submitQuickPay, submitPayment,
+        };
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>

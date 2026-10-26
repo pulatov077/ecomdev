@@ -1,0 +1,22 @@
+{
+  "name": "ecomdev",
+  "version": "1.0.0",
+  "description": "Mini to'lovlar hisobi — O'quv markazi (Supabase + Vue.js)",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
