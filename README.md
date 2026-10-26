@@ -1,6 +1,6 @@
 # EcomDev — O'quv markazi to'lovlar hisobi
 
-O'quv markazi uchun to'lovlarni boshqarish va oylik qarzdorlikni kuzatish tizimi (REST API + Mobile-friendly veb-interfeys).
+O'quv markazi uchun to'lovlarni boshqarish va oylik qarzdorlikni monitoring qilish tizimi (REST API + Mobile-friendly veb-interfeys).
 
 ## Texnologik stek
 
@@ -10,46 +10,23 @@ O'quv markazi uchun to'lovlarni boshqarish va oylik qarzdorlikni kuzatish tizimi
 
 ---
 
-## Ishga tushirish
+## Ishga tushirish (Zero-config)
 
-### 1. Baza jadvallarini yaratish
-Supabase SQL Editor-da `schema.sql` fayli ichidagi SQL kodini yurgizing.
-
-### 2. O'rnatish va muhit sozlamalari
+Loyiha tayyor demo bulutli ma'lumotlar bazasiga ulangan. Hech qanday qo'shimcha baza o'rnatish yoki sozlash talab etilmaydi:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/econdev.git
-cd econdev
+git clone https://github.com/pulatov077/ecomdev.git
+cd ecomdev
 npm install
-```
-
-Loyiha ildizida `.env` fayl yarating:
-```env
-PORT=3000
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-supabase-anon-key
-```
-
-### 3. Ma'lumotlarni to'ldirish (ixtiyoriy)
-Real o'quvchilar va to'lovlar bilan bazani to'ldirish:
-```bash
-npm run seed
-```
-
-### 4. Serverni ishga tushirish
-
-Development:
-```bash
 npm run dev
 ```
 
-Production:
-```bash
-npm run build
-npm start
+Brauzerda oching:
+```
+http://localhost:3000
 ```
 
-Brauzerda: `http://localhost:3000`
+> *(Ixtiyoriy: Agar o'zingizning shaxsiy Supabase bazangizni ulamoqchi bo'lsangiz, `schema.sql` skriptini SQL Editor-da yurgizib, `.env` faylida `SUPABASE_URL` va `SUPABASE_KEY` ni ko'rsatishingiz mumkin).*
 
 ---
 
